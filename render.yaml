@@ -1,0 +1,7 @@
+services:
+  - type: web
+    name: sentiment-analysis-app
+    env: python
+    buildCommand: ""
+    startCommand: ./start.sh
+    region: oregon
