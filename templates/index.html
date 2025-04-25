@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Sentiment Analysis</title>
+
+    <!-- Twitter shortcut icon -->
+    <link
+      rel="shortcut icon"
+      href="https://abs.twimg.com/favicons/twitter.2.ico"
+      type="image/x-icon" />
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins&display=swap"
+      rel="stylesheet" />
+    <style>
+      :root {
+        --bg-color: #f0f9ff;
+        --text-color: #000;
+        --card-bg: #ffffff;
+        --accent: #4facfe;
+        --hover: #3b8fd5;
+        --shadow: rgba(0, 0, 0, 0.1);
+      }
+
+      body.dark {
+        --bg-color: #121212;
+        --text-color: #e0e0e0;
+        --card-bg: #1e1e1e;
+        --accent: #90caf9;
+        --hover: #64b5f6;
+        --shadow: rgba(255, 255, 255, 0.1);
+      }
+
+      body {
+        font-family: "Poppins", sans-serif;
+        background: var(--bg-color);
+        color: var(--text-color);
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        min-height: 100vh;
+        justify-content: center;
+        transition: background 0.3s ease, color 0.3s ease;
+      }
+
+      .toggle-container {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+      }
+
+      .toggle-btn {
+        background-color: var(--accent);
+        color: #fff;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 20px;
+        cursor: pointer;
+        font-size: 14px;
+        transition: background-color 0.3s ease;
+      }
+
+      .toggle-btn:hover {
+        background-color: var(--hover);
+      }
+
+      h2 {
+        margin-bottom: 20px;
+        text-shadow: 1px 1px 2px #333;
+      }
+
+      form {
+        background: var(--card-bg);
+        padding: 30px;
+        border-radius: 15px;
+        box-shadow: 0 10px 25px var(--shadow);
+        width: 90%;
+        max-width: 500px;
+        text-align: center;
+      }
+
+      textarea {
+        padding: 20px;
+        font-size: 16px;
+        border: 1px solid #ccc;
+        border-radius: 10px;
+        resize: vertical;
+        background-color: #fefefe;
+        width: 100%;
+        box-sizing: border-box;
+      }
+
+      body.dark textarea {
+        background-color: #333;
+        color: #fff;
+        border: 1px solid #555;
+      }
+
+      input[type="submit"] {
+        margin-top: 15px;
+        background-color: var(--accent);
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        font-size: 16px;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+      }
+
+      input[type="submit"]:hover {
+        background-color: var(--hover);
+      }
+
+      .result-card {
+        margin-top: 30px;
+        background-color: var(--card-bg);
+        padding: 25px;
+        border-radius: 15px;
+        box-shadow: 0 2px 12px var(--shadow);
+        width: 90%;
+        max-width: 500px;
+        text-align: center;
+        animation: fadeIn 0.6s ease;
+        border-left: 6px solid var(--accent);
+      }
+
+      .result-card h3 {
+        font-size: 26px;
+        margin-bottom: 10px;
+        font-weight: bold;
+      }
+
+      .result-card.positive {
+        border-left-color: #4caf50;
+      }
+
+      .result-card.positive h3 {
+        color: #4caf50;
+      }
+
+      .result-card.negative {
+        border-left-color: #f44336;
+      }
+
+      .result-card.negative h3 {
+        color: #f44336;
+      }
+
+      .result-card.neutral {
+        border-left-color: #ff9800;
+      }
+
+      .result-card.neutral h3 {
+        color: #ff9800;
+      }
+
+      .result-card.irrelevant {
+        border-left-color: #2196f3;
+      }
+
+      .result-card.irrelevant h3 {
+        color: #2196f3;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .emoji {
+        font-size: 38px;
+        margin-top: 5px;
+        display: block;
+        transition: transform 0.3s ease;
+      }
+
+      .result-card:hover .emoji {
+        transform: scale(1.2);
+      }
+
+      .reset-btn {
+        display: inline-block;
+        margin-top: 18px;
+        text-decoration: none;
+        color: var(--accent);
+        font-weight: bold;
+        transition: color 0.3s ease;
+        font-size: 16px;
+      }
+
+      .reset-btn:hover {
+        color: var(--hover);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="toggle-container">
+      <button class="toggle-btn" onclick="toggleDarkMode()">
+        🌙 Dark Mode
+      </button>
+    </div>
+
+    <h2>Twitter Sentiment Analysis</h2>
+
+    <form action="/predict-form" method="post">
+      <textarea
+        name="text"
+        rows="4"
+        cols="50"
+        placeholder="Enter your review..."></textarea
+      ><br /><br />
+      <input type="submit" value="Analyze" />
+    </form>
+
+    {% if result %}
+    <div
+      class="result-card {% if result == 'Positive' %}positive {% elif result == 'Negative' %}negative {% elif result == 'Neutral' %}neutral {% elif result == 'Irrelevant' %}irrelevant {% endif %}">
+      <h3>Result: {{ result }}</h3>
+      <span class="emoji">
+        {% if result == "Positive" %} 😊 {% elif result == "Negative" %} 😞 {%
+        elif result == "Neutral" %} 😐 {% elif result == "Irrelevant" %} ❓ {%
+        endif %}
+      </span>
+      <a href="/" class="reset-btn">🔁 Try Another</a>
+    </div>
+    {% endif %}
+
+    <script>
+      function toggleDarkMode() {
+        document.body.classList.toggle("dark");
+        localStorage.setItem(
+          "theme",
+          document.body.classList.contains("dark") ? "dark" : "light"
+        );
+      }
+
+      window.onload = () => {
+        if (localStorage.getItem("theme") === "dark") {
+          document.body.classList.add("dark");
+        }
+      };
+    </script>
+  </body>
+</html>
